@@ -73,21 +73,23 @@ export default function Sidebar({ activeLayers, onToggleLayer }) {
     <div
       style={{
         position: "absolute",
-        left: 0,
-        top: 0,
-        height: "100%",
-        width: 64,
+        left: 14,
+        top: "50%",
+        transform: "translateY(-50%)",
+        width: 60,
         zIndex: 20,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        paddingTop: 16,
-        paddingBottom: 16,
+        paddingTop: 14,
+        paddingBottom: 14,
         gap: 6,
-        background: "rgba(12, 14, 22, 0.82)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
-        borderRight: "1px solid rgba(255,255,255,0.08)",
+        background: "rgba(10, 12, 20, 0.55)",
+        backdropFilter: "blur(14px)",
+        WebkitBackdropFilter: "blur(14px)",
+        border: "1px solid rgba(255,255,255,0.09)",
+        borderRadius: 18,
+        boxShadow: "0 8px 32px rgba(0,0,0,0.35)",
       }}
     >
       {/* Logo mark */}
