@@ -136,13 +136,13 @@ export default function MapContainer({
     const map = new mapboxgl.Map({
       container: containerRef.current,
       style: "mapbox://styles/mapbox/satellite-streets-v12",
-      center: [72.5713, 23.0225],
+      center: [46.6753, 24.7136],
       zoom: 12,
       pitch: 0,
       bearing: 0,
       maxBounds: [
-        [72.35, 22.85],
-        [72.75, 23.20],
+        [46.35, 24.45],
+        [47.10, 25.10],
       ],
       minZoom: 10,
       maxZoom: 18,
