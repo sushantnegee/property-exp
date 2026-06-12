@@ -129,17 +129,42 @@ export default function MapContainer({
   const markersRef = useRef([])
   const poiMarkersRef = useRef({}) // { layerKey: [mapboxgl.Marker, ...] }
 
+  function addTerrainAndSky(map) {
+    if (!map.getSource("mapbox-dem")) {
+      map.addSource("mapbox-dem", {
+        type: "raster-dem",
+        url: "mapbox://mapbox.mapbox-terrain-dem-v1",
+        tileSize: 512,
+        maxzoom: 14,
+      })
+    }
+    map.setTerrain({ source: "mapbox-dem", exaggeration: 1.2 })
+
+    if (!map.getLayer("sky")) {
+      map.addLayer({
+        id: "sky",
+        type: "sky",
+        paint: {
+          "sky-type": "atmosphere",
+          "sky-atmosphere-sun": [0.0, 0.0],
+          "sky-atmosphere-sun-intensity": 15,
+        },
+      })
+    }
+  }
+
   // Init map
   useEffect(() => {
     mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN
 
     const map = new mapboxgl.Map({
       container: containerRef.current,
-      style: "mapbox://styles/mapbox/satellite-streets-v12",
+      style: "mapbox://styles/mapbox/satellite-v9",
       center: [46.6753, 24.7136],
-      zoom: 12,
-      pitch: 0,
+      zoom: 13,
+      pitch: 30,
       bearing: 0,
+      pixelRatio: 2,
       maxBounds: [
         [46.35, 24.45],
         [47.10, 25.10],
@@ -149,6 +174,10 @@ export default function MapContainer({
     })
 
     mapRef.current = map
+
+    map.on("style.load", () => {
+      addTerrainAndSky(map)
+    })
 
     map.on("load", () => {
       onMapReady && onMapReady(map)
@@ -277,7 +306,7 @@ export default function MapContainer({
     if (!map || !map.loaded()) return
 
     if (!selectedProject) {
-      map.easeTo({ pitch: 0, bearing: 0, zoom: 12, duration: 800 })
+      map.easeTo({ pitch: 30, bearing: 0, zoom: 13, duration: 800 })
       removeRadiusLayers(map)
     }
   }, [selectedProject])

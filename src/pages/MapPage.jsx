@@ -36,8 +36,7 @@ export default function MapPage() {
 {/* Left sidebar — z-index 20 */}
       <Sidebar activeLayers={activeLayers} onToggleLayer={toggleLayer} />
 
-      {/* Style switcher — uncomment to re-enable */}
-      {/* {mapInstance && <StyleSwitcher map={mapInstance} />} */}
+      {mapInstance && <StyleSwitcher map={mapInstance} />}
 
       {/* Right detail panel — z-index 50, animated */}
       <AnimatePresence>
