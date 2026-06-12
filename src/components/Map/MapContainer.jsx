@@ -136,13 +136,13 @@ export default function MapContainer({
     const map = new mapboxgl.Map({
       container: containerRef.current,
       style: "mapbox://styles/mapbox/satellite-streets-v12",
-      center: [72.5713, 23.0225],
+      center: [46.6753, 24.7136],
       zoom: 12,
       pitch: 0,
       bearing: 0,
       maxBounds: [
-        [72.35, 22.85],
-        [72.75, 23.20],
+        [46.35, 24.45],
+        [47.10, 25.10],
       ],
       minZoom: 10,
       maxZoom: 18,
@@ -203,21 +203,32 @@ export default function MapContainer({
         map.addSource(sourceId, { type: "geojson", data: circle })
       }
 
-      if (!map.getLayer(`${sourceId}-fill`)) {
+      // Outer glow line (wide + blurred)
+      if (!map.getLayer(`${sourceId}-glow`)) {
         map.addLayer({
-          id: `${sourceId}-fill`,
-          type: "fill",
+          id: `${sourceId}-glow`,
+          type: "line",
           source: sourceId,
-          paint: { "fill-color": "#ffffff", "fill-opacity": 0.06 },
+          paint: {
+            "line-color": "#ffffff",
+            "line-width": 22,
+            "line-opacity": 0.22,
+            "line-blur": 6,
+          },
         })
       }
 
+      // Inner crisp line
       if (!map.getLayer(`${sourceId}-line`)) {
         map.addLayer({
           id: `${sourceId}-line`,
           type: "line",
           source: sourceId,
-          paint: { "line-color": "#ffffff", "line-width": 1.5, "line-opacity": 0.7 },
+          paint: {
+            "line-color": "#ffffff",
+            "line-width": 3,
+            "line-opacity": 0.9,
+          },
         })
       }
 
@@ -254,7 +265,7 @@ export default function MapContainer({
     RADIUS_IDS.forEach((id) => {
       if (map.getLayer(`${id}-label`)) map.removeLayer(`${id}-label`)
       if (map.getLayer(`${id}-line`)) map.removeLayer(`${id}-line`)
-      if (map.getLayer(`${id}-fill`)) map.removeLayer(`${id}-fill`)
+      if (map.getLayer(`${id}-glow`)) map.removeLayer(`${id}-glow`)
       if (map.getSource(`${id}-label-src`)) map.removeSource(`${id}-label-src`)
       if (map.getSource(id)) map.removeSource(id)
     })
