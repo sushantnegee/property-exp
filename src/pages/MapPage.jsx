@@ -30,6 +30,19 @@ export default function MapPage() {
     return () => clearTimeout(t)
   }, [])
 
+  // Intro zoom-in: ease from overview to target view when loader finishes
+  useEffect(() => {
+    if (!mapInstance || !timerDone) return
+    mapInstance.easeTo({
+      center: [46.6753, 24.7136],
+      zoom: 13,
+      pitch: 30,
+      bearing: 0,
+      duration: 2000,
+      easing: (t) => 1 - Math.pow(1 - t, 3),
+    })
+  }, [mapInstance, timerDone])
+
   function handleProjectClick(project) {
     setSelectedProject(project)
   }
@@ -65,8 +78,8 @@ export default function MapPage() {
       <div style={{
         position: "absolute", top: 14, left: 16, zIndex: 40, pointerEvents: "none",
         background: "var(--ui-bg)",
-        backdropFilter: "blur(10px)",
-        WebkitBackdropFilter: "blur(10px)",
+        backdropFilter: "blur(6px)",
+        WebkitBackdropFilter: "blur(6px)",
         borderRadius: 12,
         padding: "8px 14px",
       }}>
@@ -80,13 +93,14 @@ export default function MapPage() {
       {/* Left sidebar */}
       <Sidebar activeLayers={activeLayers} onToggleLayer={toggleLayer} />
 
+      {/* StyleSwitcher disabled
       {mapInstance && (
         <StyleSwitcher
           map={mapInstance}
           activeStyle={mapStyle}
           onStyleChange={handleStyleChange}
         />
-      )}
+      )} */}
       <TopRightControls theme={theme} onToggleTheme={handleToggleTheme} />
       {mapInstance && <MapControls map={mapInstance} />}
 

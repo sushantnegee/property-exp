@@ -120,42 +120,29 @@ function createMarkerEl(project) {
   wrapper.style.cssText = "display:flex;flex-direction:column;align-items:center;cursor:pointer;"
 
   const pill = document.createElement("div")
+  pill.className = "project-pill"
   pill.style.cssText = `
-    background: #091413;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.22);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     border-radius: 999px;
     padding: 6px 14px;
-    color: #fff;
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.02em;
     white-space: nowrap;
-    box-shadow: 0 0 12px rgba(255,255,255,0.08), 0 2px 16px rgba(0,0,0,0.5);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     font-family: 'Roboto', system-ui, sans-serif;
+    cursor: pointer;
   `
   pill.textContent = project.name
-  pill.addEventListener("mouseenter", () => {
-    pill.style.transform = "scale(1.07)"
-    pill.style.boxShadow = "0 0 18px rgba(255,255,255,0.18), 0 4px 20px rgba(0,0,0,0.6)"
-  })
-  pill.addEventListener("mouseleave", () => {
-    pill.style.transform = "scale(1)"
-    pill.style.boxShadow = "0 0 12px rgba(255,255,255,0.08), 0 2px 16px rgba(0,0,0,0.5)"
-  })
 
   const line = document.createElement("div")
-  line.style.cssText = "width:2px;height:18px;background:rgba(255,255,255,0.7);"
+  line.className = "project-pill-line"
+  line.style.cssText = "width:2px;height:18px;"
 
   const dot = document.createElement("div")
-  dot.style.cssText = `
-    width: 8px; height: 8px;
-    background: #fff;
-    border-radius: 50%;
-    box-shadow: 0 0 6px rgba(255,255,255,0.8);
-  `
+  dot.className = "project-pill-dot"
+  dot.style.cssText = "width:8px;height:8px;border-radius:50%;transition:background 0.2s,box-shadow 0.2s;"
 
   wrapper.appendChild(pill)
   wrapper.appendChild(line)
@@ -213,8 +200,8 @@ export default function MapContainer({
       container: containerRef.current,
       style: "mapbox://styles/mapbox/satellite-v9",
       center: [46.6753, 24.7136],
-      zoom: 13,
-      pitch: 30,
+      zoom: 11.5,
+      pitch: 10,
       bearing: 0,
       pixelRatio: 2,
       fadeDuration: 0,

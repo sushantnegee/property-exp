@@ -79,8 +79,8 @@ export default function Sidebar({ activeLayers, onToggleLayer }) {
         flexDirection: "column",
         alignItems: "center",
         background: "var(--ui-bg)",
-        backdropFilter: "blur(10px)",
-        WebkitBackdropFilter: "blur(10px)",
+        backdropFilter: "blur(6px)",
+        WebkitBackdropFilter: "blur(6px)",
         borderRadius: 12,
       }}
     >

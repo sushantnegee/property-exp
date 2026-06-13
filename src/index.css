@@ -35,6 +35,43 @@ body {
   --card-border-hover:      rgba(255,255,255,0.70);
 }
 
+/* ── Project map labels ─────────────────────────────────── */
+.project-pill {
+  background: #091413;
+  border: 1px solid rgba(255,255,255,0.22);
+  color: #fff;
+  box-shadow: 0 0 12px rgba(255,255,255,0.08), 0 2px 16px rgba(0,0,0,0.5);
+}
+.project-pill:hover {
+  transform: scale(1.07);
+  box-shadow: 0 0 18px rgba(255,255,255,0.18), 0 4px 20px rgba(0,0,0,0.6);
+}
+.project-pill-line {
+  background: rgba(255,255,255,0.7);
+}
+.project-pill-dot {
+  background: #fff;
+  box-shadow: 0 0 6px rgba(255,255,255,0.8);
+}
+
+[data-theme="light"] .project-pill {
+  background: rgba(255,255,255,0.92);
+  border: 1px solid rgba(0,0,0,0.15);
+  color: #1a1a1a;
+  box-shadow: 0 0 12px rgba(0,0,0,0.08), 0 2px 16px rgba(0,0,0,0.2);
+}
+[data-theme="light"] .project-pill:hover {
+  transform: scale(1.07);
+  box-shadow: 0 0 18px rgba(0,0,0,0.15), 0 4px 20px rgba(0,0,0,0.25);
+}
+[data-theme="light"] .project-pill-line {
+  background: rgba(0,0,0,0.4);
+}
+[data-theme="light"] .project-pill-dot {
+  background: #333;
+  box-shadow: 0 0 6px rgba(0,0,0,0.3);
+}
+
 /* ── Light theme — same blur/transparency as dark, white base ── */
 [data-theme="light"] {
   --ui-bg:                  rgba(255,255,255,0.35);

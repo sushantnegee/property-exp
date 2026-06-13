@@ -46,7 +46,8 @@ export default function MapControls({ map }) {
     if (key === "in")  map.easeTo({ zoom: map.getZoom() + ZOOM_DELTA, duration: 300 })
     if (key === "out") map.easeTo({ zoom: map.getZoom() - ZOOM_DELTA, duration: 300 })
     if (key === "fit") {
-      map.flyTo({
+      map.stop()
+      map.easeTo({
         center: DEFAULT_CENTER,
         zoom: DEFAULT_ZOOM,
         pitch: DEFAULT_PITCH,
@@ -67,8 +68,8 @@ export default function MapControls({ map }) {
         flexDirection: "column",
         alignItems: "center",
         background: "var(--ui-bg)",
-        backdropFilter: "blur(10px)",
-        WebkitBackdropFilter: "blur(10px)",
+        backdropFilter: "blur(6px)",
+        WebkitBackdropFilter: "blur(6px)",
         borderRadius: 12,
       }}
     >
