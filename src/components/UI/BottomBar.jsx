@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 
 const STATUS_COLORS = {
@@ -9,6 +9,11 @@ const STATUS_COLORS = {
 
 export default function BottomBar({ projects, selectedProject, onProjectSelect }) {
   const [isOpen, setIsOpen] = useState(false)
+
+  // Collapse list when a project is selected
+  useEffect(() => {
+    if (selectedProject) setIsOpen(false)
+  }, [selectedProject])
 
   return (
     <div
@@ -34,12 +39,12 @@ export default function BottomBar({ projects, selectedProject, onProjectSelect }
           gap: 6,
           padding: "7px 18px",
           margin: "10px 0 8px 0",
-          background: "rgba(10,12,20,0.55)",
+          background: "var(--ui-bg)",
           backdropFilter: "blur(10px)",
           WebkitBackdropFilter: "blur(10px)",
-          border: "1px solid rgba(255,255,255,0.14)",
-          borderRadius: 999,
-          color: "#fff",
+          border: "none",
+          borderRadius: 12,
+          color: "var(--ui-color)",
           fontSize: 12,
           fontWeight: 600,
           cursor: "pointer",
@@ -66,26 +71,15 @@ export default function BottomBar({ projects, selectedProject, onProjectSelect }
           <polyline points="18 15 12 9 6 15" />
         </svg>
         All Projects
-        <span
-          style={{
-            background: "#2563eb",
-            borderRadius: 999,
-            padding: "1px 7px",
-            fontSize: 10,
-            fontWeight: 700,
-          }}
-        >
-          {projects.length}
-        </span>
       </button>
 
       {/* Panel — expands below button, pushes button up smoothly */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
+            initial={{ height: 0 }}
+            animate={{ height: "auto" }}
+            exit={{ height: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 32 }}
             style={{
               width: "100%",
@@ -106,7 +100,8 @@ export default function BottomBar({ projects, selectedProject, onProjectSelect }
                   display: "flex",
                   gap: 10,
                   overflowX: "auto",
-                  paddingBottom: 4,
+                  paddingTop:3,
+                  paddingBottom: 3,
                   scrollbarWidth: "none",
                   maxWidth: "75vw",
                   borderRadius: 10,
@@ -126,26 +121,25 @@ export default function BottomBar({ projects, selectedProject, onProjectSelect }
                         height: 110,
                         display: "flex",
                         border: isSelected
-                          ? "2px solid #2563eb"
-                          : "1px solid rgba(255,255,255,0.1)",
-                        borderRadius: 10,
+                          ? "2px solid var(--card-border-selected)"
+                          : "1px solid var(--card-border-default)",
+                        borderRadius: 12,
                         overflow: "hidden",
                         cursor: "pointer",
-                        background: "rgba(10,12,20,0.55)",
-                      backdropFilter: "blur(12px)",
-                      WebkitBackdropFilter: "blur(12px)",
-                        transition: "border 0.15s, transform 0.15s, box-shadow 0.15s",
+                        background: "var(--ui-bg)",
+                        backdropFilter: "blur(10px)",
+                        WebkitBackdropFilter: "blur(10px)",
+                        transition: "border 0.15s, box-shadow 0.15s",
                         outline: "none",
                         boxShadow: isSelected
-                          ? "0 0 0 1px #2563eb, 0 4px 16px rgba(37,99,235,0.25)"
+                          ? "0 0 0 1px rgba(255,255,255,0.4), 0 4px 16px rgba(0,0,0,0.3)"
                           : "none",
-                        transform: isSelected ? "translateY(-2px)" : "none",
                       }}
                       onMouseEnter={(e) => {
-                        if (!isSelected) e.currentTarget.style.borderColor = "rgba(255,255,255,0.28)"
+                        if (!isSelected) e.currentTarget.style.borderColor = "var(--card-border-hover)"
                       }}
                       onMouseLeave={(e) => {
-                        if (!isSelected) e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"
+                        if (!isSelected) e.currentTarget.style.borderColor = "var(--card-border-default)"
                       }}
                     >
                       <div style={{ width: 80, flexShrink: 0 }}>
@@ -171,7 +165,7 @@ export default function BottomBar({ projects, selectedProject, onProjectSelect }
                             style={{
                               fontSize: 12,
                               fontWeight: 700,
-                              color: "#f1f5f9",
+                              color: "var(--card-text)",
                               lineHeight: 1.3,
                               marginBottom: 2,
                               overflow: "hidden",
@@ -181,12 +175,12 @@ export default function BottomBar({ projects, selectedProject, onProjectSelect }
                           >
                             {project.name}
                           </div>
-                          <div style={{ fontSize: 11, color: "#94a3b8", marginBottom: 6 }}>
+                          <div style={{ fontSize: 11, color: "var(--card-text-muted)", marginBottom: 6, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                             {project.area}
                           </div>
                         </div>
                         <div>
-                          <div style={{ fontSize: 11, color: "#4ade80", fontWeight: 600, marginBottom: 4 }}>
+                          <div style={{ fontSize: 11, color: "#4ade80", fontWeight: 600, marginBottom: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                             {project.price}
                           </div>
                           <span

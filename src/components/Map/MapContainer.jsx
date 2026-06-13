@@ -14,6 +14,52 @@ const POI_ICONS = {
   metro:     `<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="11" height="11"><rect x="5" y="2" width="14" height="16" rx="2"/><path d="M5 10h14M8 18l-2 4M16 18l2 4M9 6h.01M15 6h.01"/></svg>`,
 }
 
+const LANDMARK_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`
+
+function createLandmarkMarkerEl(name) {
+  const wrapper = document.createElement("div")
+  wrapper.style.cssText = "display:flex;flex-direction:column;align-items:center;cursor:pointer;"
+
+  const circle = document.createElement("div")
+  circle.style.cssText = `
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.95);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  `
+  circle.innerHTML = LANDMARK_ICON
+  circle.addEventListener("mouseenter", () => {
+    circle.style.transform = "scale(1.1)"
+    circle.style.boxShadow = "0 4px 18px rgba(0,0,0,0.55)"
+  })
+  circle.addEventListener("mouseleave", () => {
+    circle.style.transform = "scale(1)"
+    circle.style.boxShadow = "0 2px 12px rgba(0,0,0,0.45)"
+  })
+
+  const line = document.createElement("div")
+  line.style.cssText = "width:2px;height:18px;background:rgba(255,255,255,0.7);"
+
+  const dot = document.createElement("div")
+  dot.style.cssText = `
+    width: 8px; height: 8px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 6px rgba(255,255,255,0.8);
+  `
+
+  wrapper.appendChild(circle)
+  wrapper.appendChild(line)
+  wrapper.appendChild(dot)
+  return wrapper
+}
+
 function createPoiMarkerEl(key, color, name) {
   const wrapper = document.createElement("div")
   wrapper.style.cssText = "display:flex;flex-direction:column;align-items:center;gap:3px;"
@@ -75,7 +121,7 @@ function createMarkerEl(project) {
 
   const pill = document.createElement("div")
   pill.style.cssText = `
-    background: rgba(10,10,20,0.72);
+    background: #091413;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255,255,255,0.22);
@@ -88,7 +134,7 @@ function createMarkerEl(project) {
     white-space: nowrap;
     box-shadow: 0 0 12px rgba(255,255,255,0.08), 0 2px 16px rgba(0,0,0,0.5);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    font-family: Georgia, 'Times New Roman', serif;
+    font-family: 'Roboto', system-ui, sans-serif;
   `
   pill.textContent = project.name
   pill.addEventListener("mouseenter", () => {
@@ -128,6 +174,12 @@ export default function MapContainer({
   const mapRef = useRef(null)
   const markersRef = useRef([])
   const poiMarkersRef = useRef({}) // { layerKey: [mapboxgl.Marker, ...] }
+  const activeLayersRef = useRef(activeLayers)
+
+  // Keep ref in sync so style.load closure always sees latest state
+  useEffect(() => {
+    activeLayersRef.current = activeLayers
+  }, [activeLayers])
 
   function addTerrainAndSky(map) {
     if (!map.getSource("mapbox-dem")) {
@@ -165,6 +217,8 @@ export default function MapContainer({
       pitch: 30,
       bearing: 0,
       pixelRatio: 2,
+      fadeDuration: 0,
+      optimizeForTerrain: true,
       maxBounds: [
         [46.35, 24.45],
         [47.10, 25.10],
@@ -177,6 +231,32 @@ export default function MapContainer({
 
     map.on("style.load", () => {
       addTerrainAndSky(map)
+
+      const satelliteLayerId = map.getStyle().layers.find(
+        (l) => l.type === "raster"
+      )?.id
+      if (satelliteLayerId) {
+        map.setPaintProperty(satelliteLayerId, "raster-saturation", 0.2)
+        map.setPaintProperty(satelliteLayerId, "raster-contrast", 0.12)
+        map.setPaintProperty(satelliteLayerId, "raster-brightness-min", 0.0)
+        map.setPaintProperty(satelliteLayerId, "raster-brightness-max", 1.0)
+        map.setPaintProperty(satelliteLayerId, "raster-hue-rotate", 0)
+        map.setPaintProperty(satelliteLayerId, "raster-resampling", "linear")
+      }
+
+      // Style switch wipes all GL layers — re-apply whatever was active.
+      // DOM markers (POI, landmarks) also need re-adding since we clear and rebuild them.
+      const al = activeLayersRef.current
+      Object.values(poiMarkersRef.current).forEach((arr) => arr.forEach((m) => m.remove()))
+      poiMarkersRef.current = {}
+
+      handleMapOverlay(map, al.roads || al.metro)
+      handleLandmarksLayer(map, al.landmarks)
+      handlePoiLayer(map, "education", al.education)
+      handlePoiLayer(map, "hospitals", al.hospitals)
+      handlePoiLayer(map, "shopping", al.shopping)
+      handleMetroLayer(map, al.metro)
+      handleRoadsLayer(map, al.roads)
     })
 
     map.on("load", () => {
@@ -205,20 +285,7 @@ export default function MapContainer({
   }
 
   function handleProjectClick(project) {
-    const map = mapRef.current
-    if (!map) return
-
     onProjectClick(project)
-
-    map.easeTo({
-      center: project.coordinates,
-      pitch: 45,
-      bearing: -15,
-      zoom: 13.5,
-      duration: 1000,
-    })
-
-    addRadiusLayers(map, project.coordinates)
   }
 
   function addRadiusLayers(map, center) {
@@ -300,12 +367,21 @@ export default function MapContainer({
     })
   }
 
-  // Handle panel close
+  // Map animation for selected project — fires whether clicked from map marker or bottom list
   useEffect(() => {
     const map = mapRef.current
     if (!map || !map.loaded()) return
 
-    if (!selectedProject) {
+    if (selectedProject) {
+      map.easeTo({
+        center: selectedProject.coordinates,
+        pitch: 45,
+        bearing: -15,
+        zoom: 13.5,
+        duration: 1000,
+      })
+      addRadiusLayers(map, selectedProject.coordinates)
+    } else {
       map.easeTo({ pitch: 30, bearing: 0, zoom: 13, duration: 800 })
       removeRadiusLayers(map)
     }
@@ -314,14 +390,65 @@ export default function MapContainer({
   // Layer toggles
   useEffect(() => {
     const map = mapRef.current
-    if (!map || !map.loaded()) return
+    if (!map || !map.isStyleLoaded()) return
 
+    handleMapOverlay(map, activeLayers.roads || activeLayers.metro)
+    handleLandmarksLayer(map, activeLayers.landmarks)
     handlePoiLayer(map, "education", activeLayers.education)
     handlePoiLayer(map, "hospitals", activeLayers.hospitals)
     handlePoiLayer(map, "shopping", activeLayers.shopping)
     handleMetroLayer(map, activeLayers.metro)
     handleRoadsLayer(map, activeLayers.roads)
   }, [activeLayers])
+
+  function handleMapOverlay(map, isActive) {
+    const SRC = "map-dim-overlay"
+    const LAYER = "map-dim-overlay-fill"
+    if (isActive) {
+      if (!map.getSource(SRC)) {
+        map.addSource(SRC, {
+          type: "geojson",
+          data: {
+            type: "Feature",
+            geometry: {
+              type: "Polygon",
+              coordinates: [[[-180, -90], [180, -90], [180, 90], [-180, 90], [-180, -90]]],
+            },
+          },
+        })
+      }
+      if (!map.getLayer(LAYER)) {
+        // Insert overlay BEFORE the sky layer so it stays anchored below metro/road layers,
+        // which are always added without beforeId (they land at the very end = on top).
+        map.addLayer(
+          { id: LAYER, type: "fill", source: SRC, paint: { "fill-color": "#000000", "fill-opacity": 0.38 } },
+          map.getLayer("sky") ? "sky" : undefined
+        )
+      }
+    } else {
+      if (map.getLayer(LAYER)) map.removeLayer(LAYER)
+      if (map.getSource(SRC)) map.removeSource(SRC)
+    }
+  }
+
+  function handleLandmarksLayer(map, isActive) {
+    const KEY = "landmarks"
+    if (isActive) {
+      if (poiMarkersRef.current[KEY]) return
+      const markers = layerData.landmarks.points.map((point) => {
+        const el = createLandmarkMarkerEl(point.name)
+        return new mapboxgl.Marker({ element: el, anchor: "bottom" })
+          .setLngLat(point.coordinates)
+          .addTo(map)
+      })
+      poiMarkersRef.current[KEY] = markers
+    } else {
+      if (poiMarkersRef.current[KEY]) {
+        poiMarkersRef.current[KEY].forEach((m) => m.remove())
+        delete poiMarkersRef.current[KEY]
+      }
+    }
+  }
 
   function handlePoiLayer(map, key, isActive) {
     const config = layerData[key]
@@ -371,12 +498,14 @@ export default function MapContainer({
             source: sourceId,
             paint: {
               "line-color": line.color,
-              "line-width": 3,
-              "line-dasharray": [2, 1.5],
-              "line-opacity": 0.9,
+              "line-width": ["interpolate", ["linear"], ["zoom"], 10, 2.5, 16, 7],
+              "line-dasharray": [3, 2],
+              "line-opacity": 1,
             },
           })
         }
+        // Always move metro lines above the dark overlay, even if layer already existed
+        if (map.getLayer(layerId)) map.moveLayer(layerId)
       })
 
       // Metro station icon markers
@@ -407,14 +536,63 @@ export default function MapContainer({
   }
 
   function handleRoadsLayer(map, isActive) {
-    const roadLayers = map.getStyle().layers.filter(
-      (l) => l.id.includes("road") || l.id.includes("street") || l.id.includes("highway")
+    // For vector styles (dark, streets, etc.) — toggle built-in road layers.
+    // Exclude our own satellite custom layer (source: "roads-overlay") so it never
+    // triggers this path and leaves a visibility:none ghost that ends up under the overlay.
+    const existingRoadLayers = map.getStyle().layers.filter(
+      (l) =>
+        (l.id.includes("road") || l.id.includes("street") || l.id.includes("highway")) &&
+        l.source !== "roads-overlay"
     )
-    roadLayers.forEach((l) => {
-      try {
-        map.setLayoutProperty(l.id, "visibility", isActive ? "visible" : "none")
-      } catch (_) {}
-    })
+    if (existingRoadLayers.length > 0) {
+      existingRoadLayers.forEach((l) => {
+        try { map.setLayoutProperty(l.id, "visibility", isActive ? "visible" : "none") } catch (_) {}
+      })
+      return
+    }
+
+    // For satellite-v9 (pure raster, no vector layers) — add/remove a custom road overlay
+    const SRC = "roads-overlay"
+    if (isActive) {
+      if (!map.getSource(SRC)) {
+        map.addSource(SRC, {
+          type: "vector",
+          url: "mapbox://mapbox.mapbox-streets-v8",
+        })
+      }
+      const ROAD_COLORS = [
+        "match", ["get", "class"],
+        "motorway", "#ff6b81",
+        "trunk",    "#ffa94d",
+        "primary",  "#ffe066",
+        "secondary","#ffffff",
+        "#ffffff",
+      ]
+      const ROAD_FILTER = ["in", "class", "motorway", "trunk", "primary", "secondary"]
+
+      if (!map.getLayer("roads-fill")) {
+        map.addLayer({
+          id: "roads-fill",
+          type: "line",
+          source: SRC,
+          "source-layer": "road",
+          filter: ROAD_FILTER,
+          layout: { "line-cap": "round", "line-join": "round" },
+          paint: {
+            "line-color": ROAD_COLORS,
+            "line-width": ["interpolate", ["linear"], ["zoom"], 10, 1.2, 16, 5],
+            "line-opacity": 1,
+          },
+        })
+      }
+      // Always move roads above overlay and metro lines
+      if (map.getLayer("roads-fill")) map.moveLayer("roads-fill")
+    } else {
+      ["roads-fill"].forEach((id) => {
+        if (map.getLayer(id)) map.removeLayer(id)
+      })
+      if (map.getSource(SRC)) map.removeSource(SRC)
+    }
   }
 
   return (

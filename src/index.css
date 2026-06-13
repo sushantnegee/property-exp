@@ -9,8 +9,48 @@
 }
 
 body {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Roboto', system-ui, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow: hidden;
+}
+
+/* ── Dark theme (default) ───────────────────────────────── */
+:root {
+  --ui-bg:                  rgba(0,0,0,0.35);
+  --ui-pill-bg:             rgba(10,12,22,0.82);
+  --ui-pill-bg-deep:        rgba(10,12,22,0.92);
+  --ui-color:               #ffffff;
+  --ui-color-muted:         rgba(255,255,255,0.55);
+  --ui-active-bg:           #ffffff;
+  --ui-active-color:        #000000;
+  --ui-hover:               rgba(255,255,255,0.10);
+  --ui-border:              rgba(255,255,255,0.07);
+  --ui-border-subtle:       rgba(255,255,255,0.05);
+  --ui-border-pill:         rgba(255,255,255,0.13);
+  --card-text:              #f1f5f9;
+  --card-text-muted:        #94a3b8;
+  --card-border-default:    rgba(255,255,255,0.08);
+  --card-border-selected:   #ffffff;
+  --card-border-hover:      rgba(255,255,255,0.70);
+}
+
+/* ── Light theme — same blur/transparency as dark, white base ── */
+[data-theme="light"] {
+  --ui-bg:                  rgba(255,255,255,0.35);
+  --ui-pill-bg:             rgba(255,255,255,0.82);
+  --ui-pill-bg-deep:        rgba(255,255,255,0.92);
+  --ui-color:               #1a1a1a;
+  --ui-color-muted:         rgba(0,0,0,0.45);
+  --ui-active-bg:           #1a1a1a;
+  --ui-active-color:        #ffffff;
+  --ui-hover:               rgba(0,0,0,0.08);
+  --ui-border:              rgba(0,0,0,0.10);
+  --ui-border-subtle:       rgba(0,0,0,0.06);
+  --ui-border-pill:         rgba(0,0,0,0.12);
+  --card-text:              #1a1a1a;
+  --card-text-muted:        #475569;
+  --card-border-default:    rgba(0,0,0,0.10);
+  --card-border-selected:   #1a1a1a;
+  --card-border-hover:      rgba(0,0,0,0.40);
 }

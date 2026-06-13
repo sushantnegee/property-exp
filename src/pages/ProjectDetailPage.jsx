@@ -102,7 +102,7 @@ export default function ProjectDetailPage() {
               fontWeight: 700,
               color: "#0f172a",
               lineHeight: 1.2,
-              fontFamily: "Georgia, 'Times New Roman', serif",
+              fontFamily: "'Roboto', system-ui, sans-serif",
             }}
           >
             {project.name}

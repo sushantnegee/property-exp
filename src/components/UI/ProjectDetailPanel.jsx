@@ -108,7 +108,7 @@ export default function ProjectDetailPanel({ project, onClose }) {
         </div>
 
         {/* Info section */}
-        <div style={{ padding: "16px 16px 0", flex: 1, display: "flex", flexDirection: "column", overflowY: "auto" }}>
+        <div style={{ padding: "16px 16px 0", flex: 1, display: "flex", flexDirection: "column", overflowY: "auto", scrollbarWidth: "none", msOverflowStyle: "none" }}>
           <h2
             style={{
               fontSize: 20,
@@ -116,7 +116,7 @@ export default function ProjectDetailPanel({ project, onClose }) {
               color: "#0f172a",
               lineHeight: 1.25,
               marginBottom: 5,
-              fontFamily: "Georgia, 'Times New Roman', serif",
+              fontFamily: "'Roboto', system-ui, sans-serif",
             }}
           >
             {project.name}
