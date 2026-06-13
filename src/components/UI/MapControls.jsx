@@ -68,8 +68,8 @@ export default function MapControls({ map }) {
         flexDirection: "column",
         alignItems: "center",
         background: "var(--ui-bg)",
-        backdropFilter: "blur(6px)",
-        WebkitBackdropFilter: "blur(6px)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
         borderRadius: 12,
       }}
     >

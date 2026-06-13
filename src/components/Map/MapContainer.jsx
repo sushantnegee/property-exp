@@ -66,33 +66,39 @@ function createPoiMarkerEl(key, color, name) {
 
   const icon = document.createElement("div")
   icon.style.cssText = `
-    width: 22px;
-    height: 22px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
-    background: ${color};
-    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    background: ${color}40;
+    border: 1px solid ${color}cc;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 0 14px ${color}66, 0 2px 8px rgba(0,0,0,0.45);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
   `
   icon.innerHTML = POI_ICONS[key] || POI_ICONS.education
 
   const label = document.createElement("div")
   label.style.cssText = `
-    background: rgba(0,0,0,0.72);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    background: rgba(10,12,22,0.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid ${color}66;
     color: #fff;
     font-size: 10px;
     font-weight: 600;
-    padding: 3px 7px;
-    border-radius: 5px;
+    padding: 3px 8px;
+    border-radius: 6px;
     white-space: nowrap;
     max-width: 110px;
     overflow: hidden;
     text-overflow: ellipsis;
     letter-spacing: 0.02em;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.4);
     opacity: 0;
     transform: translateY(2px);
     transition: opacity 0.18s ease, transform 0.18s ease;
@@ -102,10 +108,14 @@ function createPoiMarkerEl(key, color, name) {
   label.textContent = name
 
   wrapper.addEventListener("mouseenter", () => {
+    icon.style.transform = "scale(1.15)"
+    icon.style.boxShadow = `0 0 20px ${color}99, 0 4px 12px rgba(0,0,0,0.5)`
     label.style.opacity = "1"
     label.style.transform = "translateY(0)"
   })
   wrapper.addEventListener("mouseleave", () => {
+    icon.style.transform = "scale(1)"
+    icon.style.boxShadow = `0 0 14px ${color}66, 0 2px 8px rgba(0,0,0,0.45)`
     label.style.opacity = "0"
     label.style.transform = "translateY(2px)"
   })
@@ -122,8 +132,8 @@ function createMarkerEl(project) {
   const pill = document.createElement("div")
   pill.className = "project-pill"
   pill.style.cssText = `
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border-radius: 999px;
     padding: 6px 14px;
     font-size: 12px;
@@ -198,7 +208,7 @@ export default function MapContainer({
 
     const map = new mapboxgl.Map({
       container: containerRef.current,
-      style: "mapbox://styles/mapbox/satellite-v9",
+      style: "mapbox://styles/mapbox/standard",
       center: [46.6753, 24.7136],
       zoom: 11.5,
       pitch: 10,
@@ -217,6 +227,11 @@ export default function MapContainer({
     mapRef.current = map
 
     map.on("style.load", () => {
+      // Luxury midnight theme for the Standard 3D basemap
+      if (map.getStyle().name === "Mapbox Standard" || map.getStyle().imports) {
+        map.setConfigProperty("basemap", "lightPreset", "night")
+      }
+
       addTerrainAndSky(map)
 
       const satelliteLayerId = map.getStyle().layers.find(
@@ -467,6 +482,7 @@ export default function MapContainer({
       lines.forEach((line) => {
         const sourceId = `metro-line-${line.id}`
         const layerId = `metro-line-layer-${line.id}`
+        const glowId = `metro-glow-${line.id}`
 
         if (!map.getSource(sourceId)) {
           map.addSource(sourceId, {
@@ -474,6 +490,23 @@ export default function MapContainer({
             data: {
               type: "Feature",
               geometry: { type: "LineString", coordinates: line.coordinates },
+            },
+          })
+        }
+
+        // Wide, blurred, emissive under-glow
+        if (!map.getLayer(glowId)) {
+          map.addLayer({
+            id: glowId,
+            type: "line",
+            source: sourceId,
+            layout: { "line-cap": "round", "line-join": "round" },
+            paint: {
+              "line-color": line.color,
+              "line-width": ["interpolate", ["linear"], ["zoom"], 10, 8, 16, 20],
+              "line-blur": ["interpolate", ["linear"], ["zoom"], 10, 6, 16, 14],
+              "line-opacity": 0.45,
+              "line-emissive-strength": 1,
             },
           })
         }
@@ -488,10 +521,12 @@ export default function MapContainer({
               "line-width": ["interpolate", ["linear"], ["zoom"], 10, 2.5, 16, 7],
               "line-dasharray": [3, 2],
               "line-opacity": 1,
+              "line-emissive-strength": 1,
             },
           })
         }
-        // Always move metro lines above the dark overlay, even if layer already existed
+        // Always re-stack above the dark overlay: glow first, crisp line on top
+        if (map.getLayer(glowId)) map.moveLayer(glowId)
         if (map.getLayer(layerId)) map.moveLayer(layerId)
       })
 
@@ -512,33 +547,19 @@ export default function MapContainer({
         delete poiMarkersRef.current["metro"]
       }
 
-      // Remove line layers
+      // Remove line + glow layers
       lines.forEach((line) => {
         const layerId = `metro-line-layer-${line.id}`
+        const glowId = `metro-glow-${line.id}`
         const sourceId = `metro-line-${line.id}`
         if (map.getLayer(layerId)) map.removeLayer(layerId)
+        if (map.getLayer(glowId)) map.removeLayer(glowId)
         if (map.getSource(sourceId)) map.removeSource(sourceId)
       })
     }
   }
 
   function handleRoadsLayer(map, isActive) {
-    // For vector styles (dark, streets, etc.) — toggle built-in road layers.
-    // Exclude our own satellite custom layer (source: "roads-overlay") so it never
-    // triggers this path and leaves a visibility:none ghost that ends up under the overlay.
-    const existingRoadLayers = map.getStyle().layers.filter(
-      (l) =>
-        (l.id.includes("road") || l.id.includes("street") || l.id.includes("highway")) &&
-        l.source !== "roads-overlay"
-    )
-    if (existingRoadLayers.length > 0) {
-      existingRoadLayers.forEach((l) => {
-        try { map.setLayoutProperty(l.id, "visibility", isActive ? "visible" : "none") } catch (_) {}
-      })
-      return
-    }
-
-    // For satellite-v9 (pure raster, no vector layers) — add/remove a custom road overlay
     const SRC = "roads-overlay"
     if (isActive) {
       if (!map.getSource(SRC)) {
@@ -557,6 +578,26 @@ export default function MapContainer({
       ]
       const ROAD_FILTER = ["in", "class", "motorway", "trunk", "primary", "secondary"]
 
+      // Wide blurred emissive under-glow
+      if (!map.getLayer("roads-glow")) {
+        map.addLayer({
+          id: "roads-glow",
+          type: "line",
+          source: SRC,
+          "source-layer": "road",
+          filter: ROAD_FILTER,
+          layout: { "line-cap": "round", "line-join": "round" },
+          paint: {
+            "line-color": ROAD_COLORS,
+            "line-width": ["interpolate", ["linear"], ["zoom"], 10, 4, 16, 16],
+            "line-blur": ["interpolate", ["linear"], ["zoom"], 10, 4, 16, 12],
+            "line-opacity": 0.4,
+            "line-emissive-strength": 1,
+          },
+        })
+      }
+
+      // Crisp neon line
       if (!map.getLayer("roads-fill")) {
         map.addLayer({
           id: "roads-fill",
@@ -569,13 +610,15 @@ export default function MapContainer({
             "line-color": ROAD_COLORS,
             "line-width": ["interpolate", ["linear"], ["zoom"], 10, 1.2, 16, 5],
             "line-opacity": 1,
+            "line-emissive-strength": 1,
           },
         })
       }
-      // Always move roads above overlay and metro lines
+      // Re-stack above overlay/metro: glow first, crisp line on top
+      if (map.getLayer("roads-glow")) map.moveLayer("roads-glow")
       if (map.getLayer("roads-fill")) map.moveLayer("roads-fill")
     } else {
-      ["roads-fill"].forEach((id) => {
+      ["roads-fill", "roads-glow"].forEach((id) => {
         if (map.getLayer(id)) map.removeLayer(id)
       })
       if (map.getSource(SRC)) map.removeSource(SRC)

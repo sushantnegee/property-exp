@@ -78,8 +78,8 @@ export default function MapPage() {
       <div style={{
         position: "absolute", top: 14, left: 16, zIndex: 40, pointerEvents: "none",
         background: "var(--ui-bg)",
-        backdropFilter: "blur(6px)",
-        WebkitBackdropFilter: "blur(6px)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
         borderRadius: 12,
         padding: "8px 14px",
       }}>

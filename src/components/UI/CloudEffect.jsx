@@ -1,14 +1,13 @@
 import { motion } from "framer-motion"
 
 const clouds = [
-  { id: 1, width: 700, height: 220, top: "2%",   left: "-5%",  opacity: 0.45, blur: 30, duration: 38, xRange: 80,  yRange: 20 },
-  { id: 2, width: 550, height: 180, top: "12%",  left: "60%",  opacity: 0.40, blur: 26, duration: 52, xRange: -60, yRange: 25 },
-  { id: 3, width: 750, height: 240, top: "48%",  left: "-8%",  opacity: 0.38, blur: 34, duration: 45, xRange: 90,  yRange: 18 },
-  { id: 4, width: 600, height: 200, top: "68%",  left: "55%",  opacity: 0.42, blur: 28, duration: 60, xRange: -70, yRange: 22 },
-  { id: 5, width: 460, height: 150, top: "34%",  left: "75%",  opacity: 0.38, blur: 24, duration: 34, xRange: -50, yRange: 20 },
-  { id: 6, width: 680, height: 210, top: "78%",  left: "15%",  opacity: 0.40, blur: 32, duration: 48, xRange: 65,  yRange: 15 },
-  { id: 7, width: 400, height: 130, top: "24%",  left: "25%",  opacity: 0.35, blur: 22, duration: 42, xRange: 40,  yRange: 28 },
-  { id: 8, width: 620, height: 190, top: "0%",   left: "38%",  opacity: 0.40, blur: 30, duration: 56, xRange: -55, yRange: 14 },
+  { id: 1, width: 720, height: 200, top: "4%",  left: "-6%", opacity: 0.10, blur: 40, duration: 46, xRange: 70,  yRange: 14 },
+  { id: 2, width: 560, height: 160, top: "10%", left: "58%", opacity: 0.08, blur: 36, duration: 58, xRange: -55, yRange: 18 },
+  { id: 3, width: 640, height: 180, top: "20%", left: "20%", opacity: 0.07, blur: 44, duration: 50, xRange: 60,  yRange: 12 },
+  { id: 4, width: 500, height: 150, top: "32%", left: "72%", opacity: 0.06, blur: 34, duration: 40, xRange: -45, yRange: 16 },
+  { id: 5, width: 680, height: 190, top: "2%",  left: "36%", opacity: 0.11, blur: 42, duration: 54, xRange: -50, yRange: 10 },
+  { id: 6, width: 600, height: 170, top: "70%", left: "12%", opacity: 0.05, blur: 38, duration: 60, xRange: 55,  yRange: 12 },
+  { id: 7, width: 460, height: 140, top: "78%", left: "60%", opacity: 0.05, blur: 30, duration: 48, xRange: -40, yRange: 14 },
 ]
 
 export default function CloudEffect() {
@@ -28,7 +27,7 @@ export default function CloudEffect() {
           position: "absolute",
           inset: 0,
           background:
-            "radial-gradient(ellipse 65% 60% at 50% 50%, transparent 0%, rgba(0,0,0,0.28) 55%, rgba(0,0,0,0.72) 100%)",
+            "radial-gradient(ellipse 70% 65% at 50% 45%, transparent 0%, rgba(0,0,0,0.22) 60%, rgba(0,0,0,0.6) 100%)",
         }}
       />
 
@@ -44,7 +43,7 @@ export default function CloudEffect() {
             height: c.height,
             borderRadius: "50%",
             background:
-              "radial-gradient(ellipse at center, rgba(255,255,255,1) 0%, rgba(255,255,255,0.5) 50%, transparent 100%)",
+              "radial-gradient(ellipse at center, rgba(200,215,255,0.9) 0%, rgba(200,215,255,0.4) 50%, transparent 100%)",
             opacity: c.opacity,
             filter: `blur(${c.blur}px)`,
           }}
