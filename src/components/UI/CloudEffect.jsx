@@ -20,7 +20,6 @@ export default function CloudEffect() {
         zIndex: 10,
         pointerEvents: "none",
         overflow: "hidden",
-        background: "rgba(255,0,0,0.15)",
       }}
     >
       {/* Cinematic vignette */}

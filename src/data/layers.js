@@ -1,4 +1,14 @@
 export const layers = {
+  landmarks: {
+    label: "Landmarks",
+    points: [
+      { id: "lm1", name: "Kingdom Centre Tower", coordinates: [46.6831, 24.6912] },
+      { id: "lm2", name: "Al Faisaliah Tower",   coordinates: [46.6850, 24.6892] },
+      { id: "lm3", name: "Diriyah Gate",          coordinates: [46.5763, 24.7339] },
+      { id: "lm4", name: "National Museum",       coordinates: [46.7139, 24.6890] },
+      { id: "lm5", name: "King Abdullah Park",    coordinates: [46.6710, 24.7100] },
+    ],
+  },
   education: {
     label: "Education",
     color: "#3b82f6",
